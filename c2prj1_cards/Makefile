@@ -7,3 +7,5 @@ poker: $(GIVEN_OBJS) cards.o
 	gcc -o poker -ggdb3  cards.o $(GIVEN_OBJS)
 clean:
 	rm test poker cards.o my-test-main.o *~
+test: test.c
+	gcc -o test -std=gnu99 -pedantic -Wall -Werror test.c
