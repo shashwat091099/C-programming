@@ -1,0 +1,10 @@
+Grading at Sat Jun  6 18:22:17 UTC 2020
+Compiling cards.c
+cards.c: In function ‘value_letter’:
+cards.c:72:1: error: control reaches end of non-void function [-Werror=return-type]
+ }
+ ^
+cc1: all warnings being treated as errors
+Could not compile your card.c!
+
+Overall Grade: FAILED
