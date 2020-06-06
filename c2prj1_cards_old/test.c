@@ -23,3 +23,4 @@ int main(void) {
   f(&x, y);
   printf("In main: x = %d, y = %d\n", x, y);
   return EXIT_SUCCESS;
+}
