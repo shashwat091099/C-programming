@@ -2,10 +2,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-/*
- * Helper function that retrieves numbers 'bit' value
- * ie: 1's 31st bit is 1
- */
 int getNthBit(uint32_t number, int bit) {
   if (bit <0 || bit >= 32) {
     printf("Bit %d is invalid\n", bit);
@@ -14,29 +10,16 @@ int getNthBit(uint32_t number, int bit) {
   return (number & (1<<bit)) != 0;
 }
 
-/*
- *
- * This function takes in two arrays: nums (of length nNums), and
- * bits (of length nBits). This function should:
- *
- * - Check that there is enough space in bits to hold all the bits
- *   of "nums".  Note that each number in "nums" will results in 32
- *   bits in "bits".  If this is not true, your function should
- *   print a message with the format:
- *	"Invalid call to numToBits! nBits is %d, nNums is %d\n",
- *   (where the first %d is nBits, and the second %d is nNums)
- *   then return without doing anything else.
- *
- * - Put the individual bits of each number into the "bits" array.
- *   The bits put into this array should be ordered so that the first
- *   32 bits represent nums[0], the next 32 bits are nums[1], and so
- *   on.  Within each number, the most significant bit (bit 31) should
- *   come first, and the least significant bit (bit 0) should come last.
- *   That is, bits[0] should be bit 31 of nums[0], bits[1] should
- *   be bit 30 of nums[0], and so on.
- */
 void numToBits(uint32_t * nums, int nNums, int * bits, int nBits) {
-
+  if (nNums*32 > nBits){
+    printf("Invalid call to numToBits! nBits is %d, nNums is %d\n",nBits,nNums);
+    return;}
+  for (uint32_t i =0;i < nNums;i++){
+    for (int j=0 ; j <32 ;j ++){
+      bits[i*32 + j ]=getNthBit(nums[i],31-j);
+    }
+  }
+  return;
 }
 
 void doTest(uint32_t * nums, int n) {
