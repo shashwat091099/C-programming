@@ -1,5 +1,0 @@
-Grading at Wed Jul  1 06:05:48 UTC 2020
-Attempting to compile breaker.c 
-The code did not compile!
-
-Overall Grade: F
