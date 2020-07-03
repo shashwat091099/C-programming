@@ -1,19 +1,19 @@
-Grading at Fri Jul  3 16:58:31 UTC 2020
+Grading at Fri Jul  3 17:14:52 UTC 2020
 Running 'make clean' to do a clean build of your project
 rm -rf *.o poker *~
 Running 'make poker OTHERFLAGS=-O3' to build your project
-gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3 -c cards.c
-gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3 -c deck.c
-gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3 -c eval.c
-gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3 -c future.c
-gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3 -c input.c
-gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3 -c main.c
-main.c: In function ‘main’:
-main.c:72:16: error: implicit declaration of function ‘strToInt’ [-Werror=implicit-function-declaration]
-     n_trails = strToInt(argv[2]);
-                ^
-cc1: all warnings being treated as errors
-Makefile:6: recipe for target 'main.o' failed
+gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3   -c -o cards.o cards.c
+gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3   -c -o deck.o deck.c
+gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3   -c -o eval.o eval.c
+gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3   -c -o future.o future.c
+gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3   -c -o input.o input.c
+gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3   -c -o main.o main.c
+main.c: In function ‘get_best_hand_idx’:
+main.c:31:63: error: ‘card_ptr_comp’ undeclared (first use in this function)
+     qsort(decks[i]->cards, decks[i]->n_cards, sizeof(card_t), card_ptr_comp);
+                                                               ^
+main.c:31:63: note: each undeclared identifier is reported only once for each function it appears in
+<builtin>: recipe for target 'main.o' failed
 make: *** [main.o] Error 1
 make failed
 
