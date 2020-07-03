@@ -5,99 +5,153 @@
 
 
 void assert_card_valid(card_t c) {
-  assert(c.value >=2 && c.value <=14);
-  assert(c.suit >=0 && c.suit <=3);
+  assert(c.value>=2 && c.value<=VALUE_ACE);
+  assert(c.suit>=SPADES && c.suit<=CLUBS);
 }
 
 const char * ranking_to_string(hand_ranking_t r) {
-  switch(r){
-  case STRAIGHT_FLUSH: return "STRAIGHT_FLUSH";
-  case FOUR_OF_A_KIND: return "FOUR_OF_A_KIND";
-  case FULL_HOUSE: return "FULL_HOUSE";
-  case FLUSH: return "FLUSH";
-  case STRAIGHT: return "STRAIGHT";
-  case THREE_OF_A_KIND: return "THREE_OF_A_KIND";
-  case TWO_PAIR: return "TWO_PAIR";
-  case PAIR: return "PAIR";
-  case NOTHING: return "NOTHING";
+  switch(r) {
+  case STRAIGHT_FLUSH:
+    return "STRAIGHT_FLUSH";
+    break;
+  case FOUR_OF_A_KIND:
+    return "FOUR_OF_A_KIND";
+    break;
+  case FULL_HOUSE:
+    return "FULL_HOUSE";
+    break;
+  case FLUSH:
+    return "FLUSH";
+    break;
+  case STRAIGHT:
+    return "STRAIGHT";
+    break;
+  case THREE_OF_A_KIND:
+    return "THREE_OF_A_KIND";
+    break;
+  case TWO_PAIR:
+    return "TWO_PAIR";
+    break;
+  case PAIR:
+    return "PAIR";
+    break;
+  default:
+    return "NOTHING";
+    break;
   }
-  return "";
 }
 
 char value_letter(card_t c) {
-  if(c.value>=2 && c.value < 10){
-    return '0'+c.value;
-  }else{
-    switch(c.value){
-    case 10:  return '0';
-    case 11:  return 'J';
-    case 12:  return 'Q';
-    case 13:  return 'K';
-    case 14:  return 'A';
-    }
+  if (c.value>=2 && c.value < 10) {
+    return 48 + c.value;
   }
-  return 'x';
+  else if (c.value==10) {
+    return 48;
+  }
+  else if (c.value==11) {
+    return 74;
+  }
+  else if (c.value==12) {
+    return 81;
+  }
+  else if (c.value==13) {
+    return 75;
+  }
+  else if (c.value==14) {
+    return 65;
+  }
+  else {
+    return 63;
+  }
 }
 
 
 char suit_letter(card_t c) {
-  switch(c.suit){
-  case SPADES: return 's';
-  case HEARTS: return 'h';
-  case DIAMONDS: return 'd';
-  case CLUBS: return 'c';
-  case NUM_SUITS: return 'x';
+  switch (c.suit) {
+  case SPADES:
+    return 's';
+    break;
+  case HEARTS:
+    return 'h';
+    break;
+  case CLUBS:
+    return 'c';
+    break;
+  case DIAMONDS:
+    return 'd';
+    break;
+  default:
+    return 48;
+    break;
   }
-  return 'x';
-
 }
 
 void print_card(card_t c) {
-  printf("%c",value_letter(c));
-  printf("%c",suit_letter(c));
+  printf("%c%c", value_letter(c), suit_letter(c));
 }
 
 card_t card_from_letters(char value_let, char suit_let) {
   card_t temp;
-  if(value_let > '0' && value_let <= '9'){
-    temp.value = value_let - '0';
-  }else{
-    switch(value_let){
-    case '0': temp.value = 10; break;
-    case 'J': temp.value = 11; break;
-    case 'Q': temp.value = 12; break;
-    case 'K': temp.value = 13; break;
-    case 'A': temp.value = 14; break;
-    default: temp.value = 20;
-    }
+  if (value_let==48) {
+    temp.value = 10;
   }
-  switch(suit_let){
-  case 's': temp.suit = SPADES; break;
-  case 'h': temp.suit = HEARTS; break;
-  case 'd': temp.suit = DIAMONDS; break;
-  case 'c': temp.suit = CLUBS; break;
-  default: temp.suit = 'x';
+  else if (value_let>49 && value_let<58) {
+    temp.value = value_let - 48;
+  }
+  else if (value_let==74) {
+    temp.value = 11;
+  }
+  else if (value_let==81) {
+    temp.value = 12;
+  }
+  else if (value_let==75) {
+    temp.value = 13;
+  }
+  else if (value_let==65) {
+    temp.value = 14;
+  }
+  else {
+    temp.value = 0;
   }
 
-  assert_card_valid(temp);
+  // now suits
+  switch(suit_let) {
+  case 's':
+    temp.suit = SPADES;
+    break;
+  case 'h':
+    temp.suit = HEARTS;
+    break;
+  case 'c':
+    temp.suit = CLUBS;
+    break;
+  case 'd':
+    temp.suit = DIAMONDS;
+    break;
+  default:
+    temp.suit = NUM_SUITS;
+    break;
+  }
+
+  //assert_card_valid(temp);
   return temp;
 }
 
 card_t card_from_num(unsigned c) {
   card_t temp;
-  int cSuit = c/13;
-  int cVal = c%13;
-  switch(cSuit){
-  case 0: temp.suit = SPADES; break;
-  case 1: temp.suit = HEARTS; break;
-  case 2: temp.suit = DIAMONDS; break;
-  case 3: temp.suit = CLUBS; break;
+  temp.value = 2 + (c % 13);
+  if (c < 13) {
+    temp.suit = SPADES;
   }
-
-  if(cVal >= 2){
-    temp.value = cVal;
-  }else{
-    temp.value = cVal + 13;
+  else if (c>=13 && c <26) {
+    temp.suit = HEARTS;
   }
+  else if (c>=26 && c < 39) {
+    temp.suit = CLUBS;
+  }
+  else if (c>=39 && c < 52) {
+    temp.suit = DIAMONDS;
+  }
+  assert_card_valid(temp);
   return temp;
 }
