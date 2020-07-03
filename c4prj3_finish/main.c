@@ -8,88 +8,116 @@
 #include "future.h"
 #include "input.h"
 
-void actScore(deck_t ** hands, size_t n_hands, int * win_arr){
-  size_t bt_hd_idex = 0;
-  int comp_res = 0;
-  int tie_flag = 0;
+int compare(hand_eval_t h1, hand_eval_t h2){
+  if(h1.ranking<h2.ranking) return 1;
+  if(h1.ranking>h2.ranking) return -1;
+  for(size_t i=0; i<5; i++){
+    card_t * card1 = h1.cards[i];
+    card_t * card2 = h2.cards[i];
+    if(card1->value > card2->value) return 1;
+    if(card1->value < card2->value) return -1;
+  }
+  return 0;
+}
 
-  for(size_t j=1; j<n_hands; j++){
-    comp_res = compare_hands(hands[bt_hd_idex],hands[j]);
-    if(comp_res == -1){
-      bt_hd_idex = j;
-      tie_flag = 0;
+int get_best_hand_idx(deck_t ** decks, int n_hands){
+  int tmp[n_hands+1];
+  for(int i=0; i<n_hands+1; i++) tmp[i] = 0;
+  int com;
+  hand_eval_t * eval_hands = malloc(n_hands*sizeof(*eval_hands));
+
+  //sort and evaluate
+  for(int i=0; i<n_hands; i++){
+    qsort(decks[i]->cards, decks[i]->n_cards, sizeof(card_t), card_ptr_comp);
+    eval_hands[i] = evaluate_hand(decks[i]);
+  }
+
+  for(int i=0; i<n_hands-1; i++){
+    for(int j=i+1; j<n_hands; j++){
+      com = compare(eval_hands[i], eval_hands[j]);
+      if(com>0) tmp[i]++;
+      else if(com<0) tmp[j]++;
+      else tmp[n_hands]++;
     }
-    if(comp_res == 0){
-      tie_flag = 1;
+  }
+
+  unsigned best = 0;
+  for(int i=0; i<n_hands+1; i++){
+    if(tmp[i] > tmp[best]) best = i;
+  }
+  int count = 0;
+  if(tmp[n_hands]>0){
+    for(int i=0; i<n_hands+1; i++){
+      if(tmp[i]== tmp[best]) count++;
     }
   }
-  if(tie_flag){
-    win_arr[n_hands]++;
-  }else{
-    win_arr[bt_hd_idex]++;
-  }
+  if(count>1) return n_hands;
+  return best;
 }
 
-void freeFutCards(future_cards_t * fc){
-  for(size_t i=0; i<fc->n_decks; i++){
-    free((fc->decks[i]).cards);
-  }
-  free(fc->decks);
-  free(fc);
-}
-
-void freeAll(future_cards_t * fc, deck_t ** hands, size_t n_hands, deck_t * rem_deck, int * win_arr){
-  freeFutCards(fc);
-  for(size_t i=0; i<n_hands; i++){
-    free_deck(hands[i]);
-  }
-  free(hands);
-  free_deck(rem_deck);
-  free(win_arr);
-}
 
 int main(int argc, char ** argv) {
-  //YOUR CODE GOES HERE
-  if((argc==1) || (argc>3)){
-    fprintf(stderr, "Wrong number of Arguments");
+
+  //check cml argument
+  if(argc < 2){
+    fprintf(stderr, "Invalid arguement\n");
     return EXIT_FAILURE;
   }
 
-  int n_trails;
-  deck_t ** hands;
-  deck_t * rem_cards;
-  size_t n_hands = 0;
-  FILE * f = NULL;
-  int * win_arr = NULL;
+  //Open and read file
+  FILE * f = fopen(argv[1], "r");
+  if(f==NULL){
+    fprintf(stderr, "Could not open file\n");
+    return EXIT_FAILURE;
+  }
 
-  future_cards_t * fc = (future_cards_t *)malloc(sizeof(*fc));
+  deck_t ** decks = NULL;
+  size_t n_hands = 0;
+  future_cards_t * fc = malloc(sizeof(*fc));
   fc->decks = NULL;
   fc->n_decks = 0;
+  decks = read_input(f, &n_hands, fc);
 
-  if(argc == 2){
-    n_trails = 10000;
-  }else{
-    n_trails = strToInt(argv[2]);
+  //create a deck with the remaining cards
+  deck_t * remains = build_remaining_deck(decks, n_hands);
+  int win_hands[n_hands+1];
+  for(int i=0; i<n_hands+1; i++) win_hands[i] = 0;
+
+  int n_trials = 10000;
+
+  if(argc==3) n_trials = atoi(argv[2]);
+  for(int i=0; i<n_trials; i++){
+    shuffle(remains);
+    future_cards_from_deck(remains, fc);
+    int win_idx = get_best_hand_idx(decks, n_hands);
+    win_hands[win_idx]++;
   }
 
-  f = fopen(argv[1],"r");
-  hands = read_input(f, &n_hands, fc);
-  rem_cards = build_remaining_deck(hands, n_hands);
-  win_arr = (int *)realloc(win_arr, (n_hands+1)*sizeof(*win_arr));
-  for(size_t k=0; k<n_hands+1; k++){
-    win_arr[k] = 0;
+  //print result
+  for(size_t i=0; i<n_hands; i++){
+    printf("Hand %zu won %u / %u times (%.2f%%)\n",
+	   i, win_hands[i], n_trials, (((float)win_hands[i])/n_trials)*100);
+  }
+  printf("And there were %u ties\n", win_hands[n_hands]);
+
+  //free memories
+  for(int i=0; i<n_hands; i++){
+    free_deck(decks[i]);
+  }
+  free(decks);
+  for(int i=fc->n_decks-1; i>=0;  i--){
+    if(fc->decks[i].n_cards!=0) free(fc->decks[i].cards);
+  }
+  free(fc->decks);
+  free(fc);
+  free_deck(remains);
+
+
+  //close file
+  if(fclose(f)!=0){
+    fprintf(stderr, "Could not close file");
+    return EXIT_FAILURE;
   }
 
-  for(int i=0; i<n_trails; i++){
-    shuffle(rem_cards);
-    future_cards_from_deck(rem_cards, fc);
-    actScore(hands, n_hands, win_arr);
-  }
-  for(size_t h=0; h<n_hands; h++){
-    printf("Hand %zu won %u / %u times (%.2f%%)\n", h, win_arr[h], n_trails, 100*(float)win_arr[h]/(float)n_trails);
-  }
-  printf("And there were %u ties\n", win_arr[n_hands]);
-  freeAll(fc, hands, n_hands, rem_cards, win_arr);
-  fclose(f);
   return EXIT_SUCCESS;
 }
