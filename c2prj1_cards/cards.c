@@ -5,227 +5,96 @@
 
 
 void assert_card_valid(card_t c) {
-  //assert stops the program if the statement is false
-  //check syntax for card struct
-  assert(c.value >= 0);
-  assert(c.value != 1);
-  assert(c.value <= 14);
-  assert(c.suit >= 0);
-  assert(c.suit < 4);
+  int cond1,cond2;
+  cond1=(c.value >=2 )&&(c.value <= VALUE_ACE);
+  cond2=(c.suit ==  SPADES )||(c.suit == CLUBS )||(c.suit ==  HEARTS)||(c.suit == DIAMONDS);
+  assert(cond1 && cond2);
 }
 
 const char * ranking_to_string(hand_ranking_t r) {
-  assert(r>=0);
-  assert(r<9);
-  switch(r){
-
-  case STRAIGHT_FLUSH:
-    //printf("STRAIGHT_FLUSH\n");
-    return "STRAIGHT_FLUSH";
-    break;
-  case FOUR_OF_A_KIND:
-    //printf("FOUR_OF_A_KIND\n");
-    return "FOUR_OF_A_KIND";
-    break;
-  case FULL_HOUSE:
-    //printf("FULL_HOUSE\n");
-    return "FULL_HOUSE";
-    break;
-  case FLUSH:
-    //printf("FLUSH\n");
-    return "FLUSH";
-    break;
-  case STRAIGHT:
-    //printf("STRAIGHT\n");
-    return "STRAIGHT";
-    break;
-  case THREE_OF_A_KIND:
-    //printf("THREE_OF_A_KIND\n");
-    return"THREE_OF_A_KIND";
-    break;
-  case TWO_PAIR:
-    //printf("TWO_PAIR\n");
-    return "TWO_PAIR";
-    break;
-  case PAIR:
-    //printf("PAIR\n");
-    return "PAIR";
-    break;
-  case NOTHING:
-    //printf("NOTHING\n");
-    return "NOTHING";
-    break;
-  default:
-    return "";
-    break;
+  switch (r){
+  case  STRAIGHT_FLUSH:  return "STRAIGHT_FLUSH";
+  case  FOUR_OF_A_KIND: return"FOUR_OF_A_KIND";
+  case FULL_HOUSE: return"FULL_HOUSE";
+  case  FLUSH: return"FLUSH";
+  case  STRAIGHT: return"STRAIGHT";
+  case  THREE_OF_A_KIND: return"THREE_OF_A_KIND";
+  case  TWO_PAIR: return"TWO_PAIR";
+  case  PAIR: return"PAIR";
+  default  : return"NOTHING";
   }
 }
 
 char value_letter(card_t c) {
-  char val = '0'; //10 has value '0'
-  assert_card_valid(c);
-  if (c.value>1 && c.value<10){
-    //for values 2-9
-    val += c.value;
+  char x='?';
+  if ((c.value >= 2 )&&( c.value <=9)) x = '0' + c.value ;
+  else {
+    switch(c.value){
+    case VALUE_KING : {x='K';  break;}
+    case 10 : {   x='0';  break;}
+    case VALUE_ACE :{ x= 'A' ;  break;}
+    case VALUE_QUEEN :{x='Q' ; break;}
+    case VALUE_JACK :{x='J' ; break;}
+    default :break;
+    }
   }
-  if (c.value == VALUE_ACE){
-    val += 17; //'A'=65
-  }
-  if (c.value == VALUE_KING){
-    val += 27; //'K'=75
-  }
-  if (c.value == VALUE_QUEEN){
-    val += 33; //'Q'=81
-  }
-  if (c.value == VALUE_JACK){
-    val += 26; //'J'=74
-  }
-  return val;
+  return x ;
 }
 
 
 char suit_letter(card_t c) {
-  assert_card_valid(c);
-  char suit;
+  char x='?';
   switch(c.suit){
-  case SPADES:
-    suit = 's';
-    break;
-  case HEARTS:
-    suit = 'h';
-    break;
-  case DIAMONDS:
-    suit = 'd';
-    break;
-  case CLUBS:
-    suit = 'c';
-    break;
-  default:
-    break;
+  case  SPADES : {x='s';  break;}
+  case HEARTS : {   x='h';  break;}
+  case DIAMONDS :{ x= 'd' ;  break;}
+  case CLUBS :{x='c' ; break;}
+  default :{ x='N'; break;}
   }
-  return suit;
+  return x;
+
 }
 
 void print_card(card_t c) {
-  assert_card_valid(c);
-  char suit;
-  char value;
-  suit = suit_letter(c);
-  value = value_letter(c);
-  printf("%c%c",value,suit);
+  char suit1= suit_letter( c);
+  char value1= value_letter( c);
+  printf("%c%c ",value1,suit1);
 }
 
 card_t card_from_letters(char value_let, char suit_let) {
   card_t temp;
-  //check suit
-  assert(suit_let=='c' || suit_let=='h' || suit_let=='d' || suit_let=='s');
-  //convert suit
-  switch(suit_let){
-  case 's':
-    temp.suit = SPADES;
-    break;
-  case 'h':
-    temp.suit = HEARTS;
-    break;
-  case 'd':
-    temp.suit = DIAMONDS;
-    break;
-  case 'c':
-    temp.suit = CLUBS;
-    break;
-  }
-  //convert value
-  int value = ((int) value_let); // 48='0'
-  if (value>=50 && value<=57){
-    //for values 2-9
-    temp.value = (value - 48);
-  }
-  if (value == 48){
-    temp.value = 10;
-  }
-  if (value == 65){
-    temp.value = VALUE_ACE; //'A'=65
-  }
-  if (value == 75){
-    temp.value = VALUE_KING; //'K'=75
-  }
-  if (value == 81){
-    temp.value = VALUE_QUEEN; //'Q'=81
-  }
-  if (value == 74){
-    temp.value = VALUE_JACK; //'J'=74
-  }
+  switch(value_let){
+  case 'K' : {temp.value= 13;  break;}
+  case '0' : { temp.value= 10;  break;}
+  case 'A' :{ temp.value= 14;  break;}
+  case 'Q' :{temp.value= 12; break;}
+  case 'J' :{temp.value= 11; break;}
+  default :{temp.value=value_let - '0';
+      break;} }
 
+  switch(suit_let){
+  case  's'  : {temp.suit =SPADES;  break;}
+  case 'h' : {  temp.suit =HEARTS;  break;}
+  case 'd' :{temp.suit = DIAMONDS ;  break;}
+  case  'c':{temp.suit =CLUBS ; break;}
+  default: {temp.suit = NUM_SUITS;  break; }}
   assert_card_valid(temp);
   return temp;
 }
 
 card_t card_from_num(unsigned c) {
   card_t temp;
-  assert(c>=0);
-  assert(c<52);
+  unsigned value = c%13 + 2;
+  temp.value = value;
 
-  //find suit
-  if(c>=0 && c<13){
-    temp.suit = SPADES;
-  }
-  else if (c>=13 && c<26){
-    temp.suit = HEARTS;
-  }
-  else if (c>=26 && c<39){
-    temp.suit = DIAMONDS;
-  }
-  else if (c>=39 && c<52){
-    temp.suit = CLUBS;
-  }
-  else {
-    printf("ERROR: invalid card (suit)");
-    return temp;
-  }
-
-  //find value (with %)
-  //c +=1;
-  switch(c%13){
-  case 0:
-    temp.value = VALUE_KING; //VALUE_ACE; //10
-    break;
-  case 1:
-    temp.value = VALUE_ACE; //2; //VALUE_ACE;
-    break;
-  case 2:
-    temp.value = 2; //3; //2;
-    break;
-  case 3:
-    temp.value = 3; //4; //3;
-    break;
-  case 4:
-    temp.value = 4; //5; //4;
-    break;
-  case 5:
-    temp.value = 5; //6; //5;
-    break;
-  case 6:
-    temp.value = 6; //7; //6;
-    break;
-  case 7:
-    temp.value = 7; //8; //7;
-    break;
-  case 8:
-    temp.value = 8; //9; //8;
-    break;
-  case 9:
-    temp.value = 9; //10; //9;
-    break;
-  case 10:
-    temp.value = 10; //VALUE_JACK;
-    break;
-  case 11:
-    temp.value = VALUE_JACK; //VALUE_QUEEN;
-    break;
-  case 12:
-    temp.value = VALUE_QUEEN; //VALUE_KING;
-    break;
-  }
+  unsigned suit = c/13;
+  switch(suit){
+  case  0 : {temp.suit =SPADES;  break;}
+  case 1 : {  temp.suit =HEARTS;  break;}
+  case 2 :{temp.suit = DIAMONDS ;  break;}
+  case 3:{temp.suit =CLUBS ; break;}
+  default: {temp.suit = NUM_SUITS;  break; }}
 
   return temp;
+
 }
