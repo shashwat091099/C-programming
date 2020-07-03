@@ -1,4 +1,4 @@
-Grading at Fri Jul  3 17:14:52 UTC 2020
+Grading at Fri Jul  3 17:38:30 UTC 2020
 Running 'make clean' to do a clean build of your project
 rm -rf *.o poker *~
 Running 'make poker OTHERFLAGS=-O3' to build your project
@@ -8,13 +8,54 @@ gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3   -c -o eval.o eval.c
 gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3   -c -o future.o future.c
 gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3   -c -o input.o input.c
 gcc -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3   -c -o main.o main.c
-main.c: In function ‘get_best_hand_idx’:
-main.c:31:63: error: ‘card_ptr_comp’ undeclared (first use in this function)
-     qsort(decks[i]->cards, decks[i]->n_cards, sizeof(card_t), card_ptr_comp);
-                                                               ^
-main.c:31:63: note: each undeclared identifier is reported only once for each function it appears in
-<builtin>: recipe for target 'main.o' failed
-make: *** [main.o] Error 1
-make failed
+gcc -o poker -Wall -Werror -ggdb3 -std=gnu99 -pedantic -O3 cards.o deck.o eval.o future.o input.o main.o
+ - Starting with some Texas Hold'em hands
+Running a simulation with 20000 draws for 2 hands...
+    Hand 0 was close enough to our answer
+    Hand 1 was close enough to our answer
+    Test case passed!    
+Running a simulation with 25000 draws for 3 hands...
+    Hand 0 was close enough to our answer
+    Hand 1 was close enough to our answer
+    Hand 2 was close enough to our answer
+    Test case passed!    
+Running a simulation with 25000 draws for 3 hands...
+    Hand 0 was close enough to our answer
+    Hand 1 was close enough to our answer
+    Hand 2 was close enough to our answer
+    Test case passed!    
+Running a simulation with 25000 draws for 2 hands...
+    Hand 0 was close enough to our answer
+    Hand 1 was close enough to our answer
+    Test case passed!    
+Running a simulation with 80000 draws for 4 hands...
+    Hand 0 was close enough to our answer
+    Hand 1 was close enough to our answer
+    Hand 2 was close enough to our answer
+    Hand 3 was close enough to our answer
+    Test case passed!    
+Running a simulation with 30000 draws for 2 hands...
+    Hand 0 was close enough to our answer
+    Hand 1 was close enough to our answer
+    Test case passed!    
+ - Next, few Seven Card Stud hands
+Running a simulation with 30000 draws for 2 hands...
+    Hand 0 was close enough to our answer
+    Hand 1 was close enough to our answer
+    Test case passed!    
+Running a simulation with 40000 draws for 3 hands...
+    Hand 0 was close enough to our answer
+    Hand 1 was close enough to our answer
+    Hand 2 was close enough to our answer
+    Test case passed!    
+ - Then one from a completely made up poker variant
+Running a simulation with 100000 draws for 6 hands...
+Valgrind reported errors:
+==2668== Memcheck, a memory error detector
+==2668== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==2668== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==2668== Command: ./poker whacky.txt 100000
+==2668== Parent PID: 2667
+==2668== 
 
-Overall Grade: F
+Overall Grade: B
