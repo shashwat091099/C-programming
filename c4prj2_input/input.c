@@ -1,84 +1,68 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include "cards.h"
-#include "deck.h"
 #include "future.h"
+#include "cards.h"
+#include "eval.h"
 #include "input.h"
 
-deck_t * hand_from_string(const char * str, future_cards_t * fc) {
-  deck_t * deck = malloc(sizeof(*deck));
-  deck->cards = NULL;
-  deck->n_cards = 0;
-  int i = 0;
-  char * chNewline = "\n";
-  char chQuestion = '?';
 
-  while(1) {
-    // if we come upon a future card (i.e., a `?n` card)
-    if (*(str+i) == chQuestion) {
-      size_t index;
-      int j = 1;
-      //count number of digits of n in ?n
-      while (isdigit(*(str+i+j))) {
-	j++;
-      }
-      //create string of length with same number of digits as  n from ?n
-      char chN[j];
-      for (int k=0; k<j-1; k++) {
-	chN[k] = *(str+i+k+1);
-      }
-      chN[j-1] = '\0';
-      int n = atoi(chN);
-      index = (size_t)n;
-      card_t * ptr = add_empty_card(deck);
-      add_future_card(fc, index, ptr);
-      i+=j;
+/*This reads one signle line and converts it into a hand*/
+deck_t * hand_from_string(const char * str, future_cards_t * fc){
+  deck_t * hand = malloc(sizeof(deck_t));
+  hand->n_cards = 0;
+  hand->cards = NULL;
+  card_t cardToAdd;
+  int unkIdx;
+  card_t * futureCardPtr = NULL;
+
+  for (size_t i = 0; i < strlen(str); i++) { //Iterate through each character in the string
+    //Call card_from_letters with the char and the next one if it's a capital letter or number
+    if (isupper(str[i]) || isdigit(str[i])) {
+      cardToAdd = card_from_letters(str[i], str[i+1]);
+      add_card_to(hand, cardToAdd);
     }
-    // else check if we come upon a known card (e.g., As or 3c)
-    else if (isalnum(*(str+i))) {
-      card_t c = card_from_letters(*(str+i), *(str+i+1));
-      add_card_to(deck, c);
-      i+=2;
-    }
-    // else check if we have come upon the end of the line.
-    // that is, the end of the hand.
-    else if (strcmp(str+i, chNewline)==0) {
-      break;
-    }
-    // otherwise go to the next char in the line
-    else {
-      i++;
+    else if (str[i] == '?') { //Call add_empty_card for any ? encountered
+      unkIdx = atoi(&str[i+1]); //read the number after the ? to determine the unkIdx
+
+      futureCardPtr = add_empty_card(hand);
+      add_future_card(fc, unkIdx, futureCardPtr);
+
+      do {
+	i++;
+      } while (isdigit(str[i])); //move past ? index
     }
   }
-
-  // make sure there are at least 5 cards in the hand
-  if (deck->n_cards < 5) {
-    //fprintf(stderr, "Hand contined less than 5 cards:\nLine: %s\n", str);
-    return NULL;
-  }
-
-  return deck;
+  return hand;
 }
 
+
+/*This function reads the input from f. Recall that the input file has one hand
+per line (and that we represent a hand with a deck_t). You should allocate a
+deck_t for each hand and place it into an array of pointers to deck_ts, which is
+your answer. This function needs to tell its caller how many hands it read. We
+could return a struct, but we are going to do this a different way: it will fill
+in *n_hands with the number of hands. This is a bit different, but you have seen
+it before: this is how getline "returns" the string it read and the size of the
+space allocated to that string.*/
 deck_t ** read_input(FILE * f, size_t * n_hands, future_cards_t * fc) {
-  //deck_t ** deck_ts = malloc(sizeof(**deck_ts));
-  deck_t ** deck_ts = NULL;
+  char * handStr = NULL;
+  size_t handStrSz = 0;
+  deck_t ** hands = NULL;
+  *n_hands = 0;
 
-  char * line = NULL;
-  size_t sz = 0;
-  int i = 0;
-  while(getline(&line, &sz, f) > 0) {
-    (*n_hands)++;
-    deck_ts = realloc(deck_ts, *n_hands * sizeof(**deck_ts));
-    deck_t * deck = hand_from_string(line, fc);
-    deck_ts[i] = deck;
-    free(line);
-    line = NULL;
-    i++;
+  while (getline(&handStr, &handStrSz, f) > 0) { //Read a line with getline
+    *n_hands = *n_hands + 1;
+    if (strlen(handStr) < 15) { //make sure it has at least 5 cards
+      fprintf(stderr, "I think there's a problem with input line %zu\n", *n_hands);
+      exit(EXIT_FAILURE);
+    }
+
+    hands = realloc(hands, *n_hands * sizeof(deck_t*));
+    hands[*n_hands - 1] = hand_from_string(handStr, fc); //Call hand_from_string to add that line to hands arrays
   }
-  free(line);
+  free(handStr);
 
-  return deck_ts;
+  return hands;
 }
