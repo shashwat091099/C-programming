@@ -1,8 +1,20 @@
-CFLAGS=-ggdb3 -Wall -Werror -pedantic -std=gnu99
-GIVEN_OBJS=deck-c4.o  eval-c4.o  future.o  input.o  main.o
-MY_OBJS=cards.o deck.o eval.o
+CFLAGS=-Wall -Werror -std=gnu99 -pedantic -ggdb3
+SRCS=$(wildcard *.c)
+OBJS=$(patsubst %.c, %.o, $(SRCS))
+PROGRAM=pokerTest
 
-test-deck: deck.o test-deck.o deck-c4.o cards.o
-	gcc -o test-deck -ggdb3 deck.o test-deck.o deck-c4.o cards.o
+$(PROGRAM): $(OBJS)
+	gcc $(CFLAGS) -o $(PROGRAM) $(OBJS)
+
+%.o: %.c
+	gcc -c $(CFLAGS) $<
+
 clean:
-	rm test poker cards.o my-test-main.o *~
+	rm -f $(OBJS) $(PROGRAM) *~
+
+cards.o: cards.h
+deck.o: deck.h
+eval.o: eval.h
+main.o: cards.h
+main.o: deck.h
+main.o: eval.h
