@@ -1,16 +1,23 @@
-Grading at Fri Jul  3 14:55:26 UTC 2020
+Grading at Fri Jul  3 14:57:57 UTC 2020
 Compiling deck.c
 Compiling cards.c
 Linking cards.o deck.o deck-c4.o and the grader's .o file
-Checking the output of all the functions other than shuffle
-Line_7_did_not_match
-Your file did not match the expected ouput
- - Those functions seem to have problems
-Checking your shuffle results with a 6 card hand...
-  Least common hand: %
-  Most  common hand: %
-  Perfectly even is: 0.138888%
- That doesn't seem terribly uniform.
- Try to improve your shuffling algorithm and re-grade
+deck-c4.o: In function `make_deck_exclude':
+/home/drew/poker/soln/deck-c4.c:7: multiple definition of `make_deck_exclude'
+deck.o:deck.c:(.text+0x300): first defined here
+deck-c4.o: In function `add_card_to':
+/home/drew/poker/soln/deck-c4.c:26: multiple definition of `add_card_to'
+deck.o:deck.c:(.text+0x220): first defined here
+deck-c4.o: In function `add_empty_card':
+/home/drew/poker/soln/deck-c4.c:36: multiple definition of `add_empty_card'
+deck.o:deck.c:(.text+0x2a0): first defined here
+deck-c4.o: In function `free_deck':
+/home/drew/poker/soln/deck-c4.c:46: multiple definition of `free_deck'
+deck.o:deck.c:(.text+0x670): first defined here
+deck-c4.o: In function `build_remaining_deck':
+/home/drew/poker/soln/deck-c4.c:55: multiple definition of `build_remaining_deck'
+deck.o:deck.c:(.text+0x450): first defined here
+collect2: error: ld returned 1 exit status
+Could not link your code!
 
-Overall Grade: F
+Overall Grade: FAILED
