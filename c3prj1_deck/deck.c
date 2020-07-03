@@ -2,117 +2,85 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "deck.h"
+
 void print_hand(deck_t * hand){
-  card_t ** ptr = hand->cards;
-  for(int i=0; i<(hand->n_cards); i++){
-    print_card(**ptr);
-    printf("%s"," ");
-    ptr++;
+  for (size_t i=0; i<hand->n_cards; i++) {
+    print_card(*hand->cards[i]);
+    printf(" ");
   }
 }
 
 int deck_contains(deck_t * d, card_t c) {
-  card_t ** ptr = d->cards;
-  for(int i=0; i<(d->n_cards); i++){
-    if(suit_letter(**ptr)== suit_letter(c) && value_letter(**ptr)==value_letter(c)){
+  for (int i=0; i<d->n_cards; i++) {
+    if (c.value==d->cards[i]->value && c.suit==d->cards[i]->suit) {
       return 1;
     }
-    ptr++;
   }
   return 0;
 }
 
-void cardPtr_swap(card_t ** ptr1, card_t ** ptr2){
-  card_t * temp = *ptr1;
-  *ptr1 = *ptr2;
-  *ptr2 = temp;
-}
-
 void shuffle(deck_t * d){
-  card_t ** ptr = d->cards;
-  int size = (int)(d->n_cards);
-  for(int i=0; i<size; i++){
-    int newPos = ((int)rand())%size;
-    cardPtr_swap(ptr+i,ptr+newPos);
+  for (int i=0; i<d->n_cards; i++) {
+    int randomIndex = random() % d->n_cards;
+    card_t * tmp = d->cards[i];
+    d->cards[i] = d->cards[randomIndex];
+    d->cards[randomIndex] = tmp;
   }
 }
 
 void assert_full_deck(deck_t * d) {
-  card_t ** ptr = d->cards;
-  deck_t temp_deck;
-  temp_deck.cards = d->cards;
-  for(int i=0; i<(d->n_cards); i++){
-    card_t temp_card = **ptr;
-    assert_card_valid(temp_card);
-    if(i>0){
-      temp_deck.n_cards = (size_t)i;
-      assert(!deck_contains(&temp_deck, temp_card));
-    }
-    ptr++;
+  assert(d->n_cards==52);
+  for (unsigned i=0; i<52; i++) {
+    assert(deck_contains(d, card_from_num(i))==1);
   }
 }
 
-void add_card_to(deck_t * deck, card_t c){
+void add_card_to(deck_t * deck, card_t c) {
   deck->n_cards++;
-  deck->cards = realloc(deck->cards,(deck->n_cards)*sizeof(*(deck->cards)));
-  deck->cards[deck->n_cards-1] = NULL;
-  deck->cards[deck->n_cards-1] = realloc(deck->cards[deck->n_cards-1], sizeof(*(deck->cards[deck->n_cards-1])));
-  deck->cards[deck->n_cards-1]->suit = c.suit;
-  deck->cards[deck->n_cards-1]->value = c.value;
+  deck->cards = realloc(deck->cards, deck->n_cards * sizeof(*deck->cards));
+  deck->cards[deck->n_cards-1] = malloc(sizeof(*deck->cards[deck->n_cards-1]));
+  *deck->cards[deck->n_cards-1] = c;
 }
 
-card_t * add_empty_card(deck_t * deck){
-  card_t * temp = malloc(sizeof(*temp));
-  temp->suit = 0;
-  temp->value = 0;
-  deck->n_cards++;
-  deck->cards = realloc(deck->cards, (deck->n_cards)*sizeof(*(deck->cards)));
-  deck->cards[deck->n_cards-1] = temp;
-  return temp;
+card_t * add_empty_card(deck_t * deck) {
+  card_t c;
+  c.value = 0;
+  c.suit = NUM_SUITS;
+  add_card_to(deck, c);
+  return deck->cards[deck->n_cards-1];
 }
 
-deck_t * make_deck_exclude(deck_t * excluded_cards){
-  card_t temp;
-  deck_t * res = malloc(sizeof(*res));
-  res->n_cards = 0;
-  res->cards = NULL;
-
-  int cond = 0;
-  for(unsigned i=0; i<52; i++){
-    temp = card_from_num(i);
-    cond = deck_contains(excluded_cards, temp);
-    if(cond==0){
-      add_card_to(res, temp);
+deck_t * make_deck_exclude(deck_t * excluded_cards) {
+  deck_t * d = malloc(sizeof(*d));
+  d->n_cards = 0;
+  d->cards = malloc(sizeof(*d->cards));
+  card_t c;
+  for(unsigned i=0; i<52; i++) {
+    c = card_from_num(i);
+    if (deck_contains(excluded_cards, c)==0) {
+      add_card_to(d, c);
     }
   }
-  return res;
+  return d;
 }
 
-deck_t * build_remaining_deck(deck_t ** hands, size_t n_hands){
-  deck_t * temp;
-  deck_t * no_ret_d = malloc(sizeof(*no_ret_d));
-  deck_t * ret_d;
-  no_ret_d->n_cards = 0;
-  no_ret_d->cards = NULL;
-  card_t * temp_c;
-  for(size_t i=0; i<n_hands; i++){
-    temp = hands[i];
-    for(size_t j=0; j<temp->n_cards; j++){
-      temp_c = temp->cards[j];
-      if(temp_c->value != 0){
-	if(deck_contains(no_ret_d, *temp_c)==0){
-	  add_card_to(no_ret_d, *temp_c);
-	}
-      }
+deck_t * build_remaining_deck(deck_t ** hands, size_t n_hands) {
+  deck_t * d = malloc(sizeof(*d));
+  d->n_cards = 0;
+  d->cards = malloc(sizeof(*d->cards));
+  for (size_t h=0; h<n_hands; h++) {
+    for (size_t c=0; c<hands[h]->n_cards; c++) {
+      add_card_to(d, *hands[h]->cards[c]);
     }
   }
-  ret_d = make_deck_exclude(no_ret_d);
-  free_deck(no_ret_d);
-  return ret_d;
+
+  d = make_deck_exclude(d);
+
+  return d;
 }
 
-void free_deck(deck_t * deck){
-  for(size_t i=0; i<deck->n_cards; i++){
+void free_deck(deck_t * deck) {
+  for (size_t i=0; i<deck->n_cards; i++) {
     free(deck->cards[i]);
   }
   free(deck->cards);
